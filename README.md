@@ -33,9 +33,9 @@ Since, the $L_{total}$ is based on Ground Truth, we will call it $L_{hard}$, for
 
 Knowledge Distillation aims to implement a new loss fucntion called $L_{soft}$, for soft loss, which is the loss function between the Student prediction and the Teacher inference output.
 
-Thus, the Knowldge Distillation output is:
+Thus, the total is:
 
-$$\mathcal{L} = \lambda * \mathcal{L}_{\text{hard}} + (1 - \lambda) * \mathcal{L}_{\text{soft}}$$ 
+$$L_{total} = \lambda * L_{\text{hard}} + (1 - \lambda) * L_{\text{soft}}$$ 
 
 with $\lambda$ as a parameter regularizing the hard and soft loss terms.
 
