@@ -84,7 +84,7 @@ However, the training can take much time because of the online teacher inference
 Because of the time-consuming nature of online Knowledge Distillation, we also proposed an offline version, which drastically reduces training time. The Offline Knowledge Distillation aims to disable online data augmentation and train Students to use the dataset. However, the Teacher can still be trained using online data augmentation.    
 The offline Knowledge Distillation workflow is detailed below.
 
-![Online KD](images/Offline-KD.png "Online KD")
+![Offline KD](images/Offline-KD.png "Offline KD")
 1. The first steps *Train Teacher*, and *Save teacher weights* use the same command as for Online Knowledge Distillation
 2. Launch the Teacher Inference using the trained weights by running the following command:
 ```shell
@@ -109,7 +109,11 @@ layers. Carion et al. ([End-to-End Object Detection with Transformers](https://l
 
 ![YOLOX-ViT](images/YoloX-ViT-Model.png "YOLOX-ViT")
 
-To activate the ViT layer in the YOLOX model, the parameter *vit* needs to be set to **True** in the model file, such as /exps/default/yolox_nano.py for the YOLOx-nano model. Then, the YOLOX-ViT training can be launched using the same training command as the basic YOLOX model. 
+To activate the ViT layer in the YOLOX model, the parameter *self.vit* needs to be set to **True** in the model file, such as /exps/default/yolox_nano.py for the YOLOx-nano model. 
+
+![Launch-YOLOX-ViT](images/Launch-ViT.png "Launch-YOLOX-ViT")
+
+Then, the YOLOX-ViT training can be launched using the same training command as the basic YOLOX model. 
 
 <!-- ## Experimental Results
 ### YOLOX - YOLOX-ViT Comparison
