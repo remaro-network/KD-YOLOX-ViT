@@ -58,7 +58,7 @@ python3 tools/train.py -f exps/default/yolox_l.py -b 8 -c datasets/COCO/weight/y
 
 2. The weights should be automatically saved under the folder /YOLOX_OUTPUTS/yolox_l/
 
-3. Before launching the YOLOX-nano model, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. The parameters $\it{self.KD}$ and $\it{self.KD\_online}$ need to be set to **True**. Finally the $\it{self.folder\_KD\_directory}$ is the repository where the images and Teacher FPN logits are saved.  
+3. Before launching the YOLOX-nano model, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. The parameters *self.KD* and *self.KD\_online* need to be set to **True**. Finally the *self.folder_KD_directory* is the repository where the images and Teacher FPN logits are saved.  
 
 ![Online KD](images/Online-KD-Code.png "Online KD")
 
@@ -80,14 +80,14 @@ Because of the time consuming for online Knowledge Distillation, we also propose
 The offline Knowledge Distillation workflow is detailled below.
 
 ![Online KD](images/Offline-KD.png "Online KD")
-1. The first steps $\it{Train}$ $\it{Teacher}$, and $\it{Save}$ $\it{teacher}$ $\it{weights}$ use the same command as for Online Knowledge Distillation
+1. The first steps *Train Teacher*, and *Save teacher weights* use the same command as for Online Knowledge Distillation
 2. Launch the Teacher Inference using the trained weights by running the following command:
 ```shell
 python3 Teacher_Inference.py
 ```
 The weights repository can be modified accordingly in the Teacher_Inference.py file. Furthermore, becaue YOLOX-nano only use image size of 416 $\times$ 416, the Teacher inference needs to be launch with the same image size. This can also be modified in the Teacher_Inference.py file.
 
-3. Same as for the Online Knowledge Distillation, before launching the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. Set $\it{self.KD}$ to **True**, however, set the $\it{self.KD\_online}$ to **False**, which indicate the Knowledge Distillation in offline mode.   
+3. Same as for the Online Knowledge Distillation, before launching the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. Set *self.KD* to **True**, however, set the *self.KD\_online* to **False**, which indicate the Knowledge Distillation in offline mode.   
 
 4. Finally, the YOLOX-nano training can be launch with 
 ```shell
