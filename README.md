@@ -109,6 +109,8 @@ layers. Carion et al. ([End-to-End Object Detection with Transformers](https://l
 
 ![YOLOX-ViT](images/YoloX-ViT-Model.png "YOLOX-ViT")
 
+To activate the ViT layer in the YOLOX model, the parameter *vit* needs to be set to **True** in the model file, such as /exps/default/yolox_nano.py for the YOLOx-nano model. Then, the YOLOX-ViT training can be launched using the same training command as the basic YOLOX model. 
+
 <!-- ## Experimental Results
 ### YOLOX - YOLOX-ViT Comparison
 This Experimental Results is divided into two different experiments.
