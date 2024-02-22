@@ -29,12 +29,12 @@ class Exp(MyExp):
         # ---------------- Knowledge Distillation config ---------------- #
         
         #KD set to True activate add the KD loss to the ground truth loss
-        self.KD = True
+        self.KD = False
         
         #KD_Online set to False recquires the teacher FPN logits saved to the "folder_KD_directory" folder
         #Then the student training will use the teacher FPN logits
         #Otherwise, if KD_Online set to True the student use the online data augmentation and does not recquire saved teacher FPN logits
-        self.KD_online = True
+        self.KD_online = False
         
         #KD_Teacher_Inference set to True save the FPN logits before using offline KD
         
