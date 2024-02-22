@@ -1,5 +1,5 @@
 # KD-YOLOX-ViT
-This repository holds the code for the Python implementation of YOLOX-ViT (TODO). Furthermore, it has the implementation of the Knowledge Distillation (KD) method, evaluation metrics of the object detector, and the side-scan sonar image dataset for underwater wall detection.
+This repository holds the code for the Python implementation of YOLOX-ViT. Furthermore, it has the implementation of the Knowledge Distillation (KD) method, evaluation metrics of the object detector, and the side-scan sonar image dataset for underwater wall detection.
 
 The Sonar Wall Detection Dataset (SWDD) is publicly accessible at https://zenodo.org/records/10528135.
 
@@ -9,20 +9,21 @@ The base of the code comes from the YOLOX repository: https://github.com/Megvii-
 
 This code has two primary contributions:
 
-- **Knowledge Distillation Enhancement**: Integrate Knowledge Distillation between a Teacher model (e.g., YOLOX-L) and a Student model (YOLOX-Nano) to improve the accuracy of the Student model. This process involves transferring knowledge from the larger, more complex Teacher model to the smaller, more efficient Student model.
+- **Knowledge Distillation Enhancement**: Integrate Knowledge Distillation between a Teacher model (e.g., YOLOX-L) and a Student model (e.g., YOLOX-Nano) to improve the accuracy of the Student model. This process involves transferring knowledge from the larger, more complex Teacher model to the smaller, more efficient Student model.
 
 - **ViT Layer Integration**: Implement a Vision Transformer (ViT) layer between the neck and the backbone to enhance the feature extraction process. This integration aims to leverage the strengths of ViT in understanding global dependencies within images, thereby improving the YOLOX feature representation capabilities.
-  
 
+Furthermore, YOLOX-ViT and KD-YOLOX-ViT have been evaluated using the proposed [SWDD](https://zenodo.org/records/10528135) object detection dataset. This dataset is a Side Scan Sonar image of walls manually annotated following the COCO annotation. It has 864 training images, a 6-minute 57-second SSS video, and 6243 extracted video frames with its manually annotated ground truth.   
 
 
 ## Knowledge Distillation
-The following image introduces the Knowledge Distillation principle used for the KD-YOLOX-ViT.
+The following illustration introduces the Knowledge Distillation principle used for the KD-YOLOX-ViT.
+
 ![Knowledge Distillation](images/KD-github.png "Knowledge Distillation")
 
 Object detection loss function is characterized by:
 - **Classification loss** improves classification accuracy, 
-- **Interval over Union (IoU) loss** enhances the precision of object localization,
+- **Intersection over Union (IoU) loss** enhances the precision of object localization,
 - **Objectness loss** refines the model's ability to identify regions containing objects
 
 Which gives the loss function: 
@@ -81,8 +82,7 @@ During the Student training, the model saves the augmented images, launches the 
 However, the training can take much time because of the online teacher inference. For instance, the [SWDD](https://zenodo.org/records/10528135) dataset requires one week to train 300 epochs on a single GPU Geforce RTX 3070 Ti.  
 
 ### Offline Knowledge Distillation
-Because of the time-consuming nature of online Knowledge Distillation, we also proposed an offline version, which drastically reduces training time. The Offline Knowledge Distillation aims to disable online data augmentation and train Students to use the dataset. However, the Teacher can still be trained using online data augmentation.    
-The offline Knowledge Distillation workflow is detailed below.
+Because of the time-consuming nature of online Knowledge Distillation, we also proposed an offline version, which drastically reduces training time. The Offline Knowledge Distillation aims to disable online data augmentation and train Students by only using the dataset. However, the Teacher can still be trained using online data augmentation, which can increase the knowledge distillate to the Student. The offline Knowledge Distillation workflow is detailed below.
 
 ![Offline KD](images/Offline-KD.png "Offline KD")
 1. The first steps *Train Teacher*, and *Save teacher weights* use the same command as for Online Knowledge Distillation
@@ -92,7 +92,7 @@ python3 Teacher_Inference.py
 ```
 The weights repository can be modified accordingly in the Teacher_Inference.py file. Furthermore, because YOLOX-nano only uses an image size of 416 $\times$ 416, the Teacher inference needs to be launched with the same size. This can also be modified in the Teacher_Inference.py file.
 
-3. Same as for the Online Knowledge Distillation, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py before launching. Set *self.KD* to **True**, however, set the *self.KD\_online* to **False**indicates the Knowledge Distillation in offline mode.   
+3. Same as for the Online Knowledge Distillation, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py before launching. Set *self.KD* to **True**, however, set the *self.KD\_online* to **False** indicates the Knowledge Distillation in offline mode, which disable the online data augmentation for the Student training.   
 
 4. Finally, the YOLOX-nano training can be launch with 
 ```shell
@@ -104,8 +104,9 @@ python3 tools/train.py -f exps/default/yolox_nano.py -b 8 -c datasets/COCO/weigh
 ```
 
 ## YOLOX-ViT
-Transformers, introduced by Vaswani et al. ([Attention Is All You Need](https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf)), initially designed for natural language processing, proved effective in handling sequential data, outperforming the state-of-the-art. Dosovitskiy et al. ([An image is worth16x16 words: Transformers for image recognition at scale](https://api.semanticscholar.org/CorpusID:225039882)) introduced the Visual Transformer called ViT, the first computer vision transformer model, achieving state-of-the-art performance on image recognition tasks without convolutional
-layers. Carion et al. ([End-to-End Object Detection with Transformers](https://link.springer.com/chapter/10.1007/978-3-030-58452-8_13)) presented DETR (DEtection TRansformer) for object detection directly predicting sets, without the need of separate region proposal and refinement stages. Integrating transformers with CNNs enhances feature extraction in object detection tasks, combining the spatial hierarchy of CNNs with the global context of transformers. Yu et al. ([Real-time underwater maritime object detection in side-scan sonar images based on transformer-yolov5](https://www.mdpi.com/2072-4292/13/18/3555)) proposed a YOLOv5-TR for containers and shipwreck detection. Aubard et al. ([Real-time automatic wall detection and localization based on side scan sonar images](https://ieeexplore.ieee.org/document/9965813)) demonstrated a 5.5% performance improvement using YOLOX. This section enhances the YOLOX model by incorporating a transformer layer between the backbone and neck at the end of the SPPBottleneck layer for improved feature extraction capability. The ViT layer is set up with 4 Multi-Head Self-Attention (MHSA) layers. The following image shows the ViT layer integration into the YOLOX model. The ViT is represented by the red arrow, in contrast the basic YOLOX architecture is represented by the dotted line.
+Transformers, introduced by Vaswani et al. ([Attention Is All You Need](https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf)), initially designed for natural language processing, proved effective in handling sequential data, outperforming the state-of-the-art. Dosovitskiy et al. ([An image is worth16x16 words: Transformers for image recognition at scale](https://api.semanticscholar.org/CorpusID:225039882)) introduced the Visual Transformer called ViT, the first computer vision transformer model, achieving state-of-the-art performance on image recognition tasks without convolutional layers. Carion et al. ([End-to-End Object Detection with Transformers](https://link.springer.com/chapter/10.1007/978-3-030-58452-8_13)) presented DETR (DEtection TRansformer) for object detection directly predicting sets, without the need of separate region proposal and refinement stages. 
+
+Integrating transformers with CNNs enhances feature extraction in object detection tasks, combining the spatial hierarchy of CNNs with the global context of transformers. Yu et al. ([Real-time underwater maritime object detection in side-scan sonar images based on transformer-yolov5](https://www.mdpi.com/2072-4292/13/18/3555)) proposed a YOLOv5-TR for containers and shipwreck detection. Aubard et al. ([Real-time automatic wall detection and localization based on side scan sonar images](https://ieeexplore.ieee.org/document/9965813)) demonstrated a 5.5% performance improvement using YOLOX. The ViT layer is set up with 4 Multi-Head Self-Attention (MHSA) layers. The following image shows the ViT layer integration into the YOLOX model. The ViT is represented by the red arrow, in contrast the basic YOLOX architecture is represented by the dotted line.
 
 ![YOLOX-ViT](images/YoloX-ViT-Model.png "YOLOX-ViT")
 
@@ -114,6 +115,13 @@ To activate the ViT layer in the YOLOX model, the parameter *self.vit* needs to 
 ![Launch-YOLOX-ViT](images/Launch-ViT.png "Launch-YOLOX-ViT")
 
 Then, the YOLOX-ViT training can be launched using the same training command as the basic YOLOX model. 
+
+## Acknowledgements
+This project has received funding from the European Union's Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No. 956200.
+
+This work is part of the Reliable AI for Marine Robotics (REMARO) Project. For more info, please visit: https://remaro.eu/
+
+![Remaro-logo](images/remaro-right-1024.png "Remaro-logo")
 
 <!-- ## Experimental Results
 ### YOLOX - YOLOX-ViT Comparison
