@@ -1,16 +1,19 @@
 # KD-YOLOX-ViT
-This repository holds the code for the Python implementation of YOLOX-ViT (TODO). Furthermore, it has the implementation of the Knowledge Distillation (KD) method, evaluation metrics of the object detector and the side-scan sonar image dataset for underwater wall detection.
+This repository holds the code for the Python implementation of YOLOX-ViT (TODO). Furthermore, it has the implementation of the Knowledge Distillation (KD) method, evaluation metrics of the object detector, and the side-scan sonar image dataset for underwater wall detection.
 
-The Sonar Wall Detection Dataset (SWDD) is publicly accessible at: https://zenodo.org/records/10528135.
+The Sonar Wall Detection Dataset (SWDD) is publicly accessible at https://zenodo.org/records/10528135.
 
-The base of the code comes from the YOLOX repository: https://github.com/Megvii-BaseDetection/YOLOX/tree/main
+The base of the code comes from the YOLOX repository: https://github.com/Megvii-BaseDetection/YOLOX/tree/main.
 
 ## Contributions
 
 This code has two primary contributions:
-- **ViT Layer Integration**: Implementing a Vision Transformer (ViT) layer between the Neck and the Backbone to enhance the feature extraction process. This integration aims to leverage the strengths of ViT in understanding global dependencies within images, thereby improving feature representation capabilities beyond conventional CNN architectures.
+
+- **Knowledge Distillation Enhancement**: Integrate Knowledge Distillation between a Teacher model (e.g., YOLOX-L) and a Student model (YOLOX-Nano) to improve the accuracy of the Student model. This process involves transferring knowledge from the larger, more complex Teacher model to the smaller, more efficient Student model.
+
+- **ViT Layer Integration**: Implement a Vision Transformer (ViT) layer between the neck and the backbone to enhance the feature extraction process. This integration aims to leverage the strengths of ViT in understanding global dependencies within images, thereby improving the YOLOX feature representation capabilities.
   
-- **Knowledge Distillation Enhancement**: Implementing Knowledge Distillation between a Teacher model (e.g., YOLOX-L) and a Student model (YOLOX-Nano) to improve the accuracy of the Student model. This process involves transferring knowledge from the larger, more complex Teacher model to the smaller, more efficient Student model, thereby enhancing its performance without significantly increasing computational costs.
+
 
 
 ## Knowledge Distillation
@@ -29,25 +32,25 @@ $$L_{total} = \lambda_{cls} \cdot L_{cls} + \lambda_{iou} \cdot L_{iou} + \lambd
 Where $\lambda_{cls}$, $\lambda_{iou}$, $\lambda_{obj}$ are the losses weights.
 
 
-Since, the $L_{total}$ is based on Ground Truth, we will call it $L_{hard}$, for hard loss.
+Since the $L_{total}$ is based on Ground Truth, we will call it $L_{hard}$ for hard loss.
 
-Knowledge Distillation aims to implement a new loss fucntion called $L_{soft}$, for soft loss, which is the loss function between the Student prediction and the Teacher inference output.
+Knowledge Distillation aims to implement a new loss function called $L_{soft}$, for soft loss, which is the loss function between the Student prediction and the Teacher inference output.
 
-Thus, the total is:
+Thus, the total loss is:
 
 $$L_{total} = \lambda * L_{\text{hard}} + (1 - \lambda) * L_{\text{soft}}$$ 
 
 with $\lambda$ as a parameter regularizing the hard and soft loss terms.
 
 ## Knowledge Distillation - YOLOX
-YOLOX is an anchor-free object detection model with decoupled head. It uses an online random data augmentation which improve the robustness and accuracy of the model.
-Knowledge Distillation use the Teacher inference output as a $L_{soft}$.
+YOLOX is an anchor-free object detection model with a decoupled head. It uses an online random data augmentation, improving the model's robustness and accuracy.
+Knowledge Distillation uses the Teacher inference output as a $L_{soft}$.
 ### Online Knowledge Distillation
-Thus, for implementing Knowledge Distillation into YOLOX the Teacher need to launch the inference with random data augmented for each training batch. This workflow is characterize in the image below.   
+Thus, to implement knowledge distillation into YOLOX, the teacher needs to launch the inference with random augmented data for each training batch. The following image characterizes the workflow.   
 
 ![Online KD](images/Online-KD.png "Online KD")
 
-Lets choose as example the YOLOX-L as Teacher and YOLOX-nano as Student.
+Let's choose as an example the YOLOX-L as Teacher and YOLOX-nano as Student.
 
 1. The following command run the YOLOX-L model
 ```shell
@@ -60,7 +63,7 @@ python3 tools/train.py -f exps/default/yolox_l.py -b 8 -c datasets/COCO/weight/y
 
 2. The weights should be automatically saved under the folder /YOLOX_OUTPUTS/yolox_l/
 
-3. Before launching the YOLOX-nano model, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. The parameters *self.KD* and *self.KD\_online* need to be set to **True**. Finally the *self.folder_KD_directory* is the repository where the images and Teacher FPN logits are saved.  
+3. Before launching the YOLOX-nano model, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. The parameters *self.KD* and *self.KD\_online* needs to be set to **True**. Finally, the *self.folder_KD_directory* is the repository where the images and Teacher FPN logits are saved.  
 
 ![Online KD](images/Online-KD-Code.png "Online KD")
 
@@ -73,13 +76,13 @@ or the following command using pre-trained weights
 python3 tools/train.py -f exps/default/yolox_nano.py -b 8 -c datasets/COCO/weight/yolox_nano.pth --fp16 --logger wandb
 ```
 
-During the Student training, the model saves the augmented images, launch the Teacher inference, save and load the FPN logits, calculate the $L_{soft}$, and finally add the $L_{soft}$ to the $L_{hard}$. 
+During the Student training, the model saves the augmented images, launches the Teacher inference, saves and loads the FPN logits, calculates the $L_{soft}$, and finally adds the $L_{soft}$ to the $L_{hard}$. 
 
-However, because of the online Teacher inference, the training can take lot of time. For instance for the [SWDD](https://zenodo.org/records/10528135) dataset recquires one week for training 300 epochs on a single GPU Geforce RTX 3070 Ti. 
+However, the training can take much time because of the online teacher inference. For instance, the [SWDD](https://zenodo.org/records/10528135) dataset requires one week to train 300 epochs on a single GPU Geforce RTX 3070 Ti.  
 
 ### Offline Knowledge Distillation
-Because of the time consuming for online Knowledge Distillation, we also proposed an offline version which drastically reduce the training time. The aim of the Offline Knowledge Distillation is to disable the online data augmentation, and train the Student using the dataset. However, the Teacher can still be trained using online data augmentation.    
-The offline Knowledge Distillation workflow is detailled below.
+Because of the time-consuming nature of online Knowledge Distillation, we also proposed an offline version, which drastically reduces training time. The Offline Knowledge Distillation aims to disable online data augmentation and train Students to use the dataset. However, the Teacher can still be trained using online data augmentation.    
+The offline Knowledge Distillation workflow is detailed below.
 
 ![Online KD](images/Offline-KD.png "Online KD")
 1. The first steps *Train Teacher*, and *Save teacher weights* use the same command as for Online Knowledge Distillation
@@ -87,9 +90,9 @@ The offline Knowledge Distillation workflow is detailled below.
 ```shell
 python3 Teacher_Inference.py
 ```
-The weights repository can be modified accordingly in the Teacher_Inference.py file. Furthermore, becaue YOLOX-nano only use image size of 416 $\times$ 416, the Teacher inference needs to be launch with the same image size. This can also be modified in the Teacher_Inference.py file.
+The weights repository can be modified accordingly in the Teacher_Inference.py file. Furthermore, because YOLOX-nano only uses an image size of 416 $\times$ 416, the Teacher inference needs to be launched with the same size. This can also be modified in the Teacher_Inference.py file.
 
-3. Same as for the Online Knowledge Distillation, before launching the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py. Set *self.KD* to **True**, however, set the *self.KD\_online* to **False**, which indicate the Knowledge Distillation in offline mode.   
+3. Same as for the Online Knowledge Distillation, the YOLOX-nano file needs to be modified for Knowledge Distillation under /exps/default/yolox_nano.py before launching. Set *self.KD* to **True**, however, set the *self.KD\_online* to **False**indicates the Knowledge Distillation in offline mode.   
 
 4. Finally, the YOLOX-nano training can be launch with 
 ```shell
