@@ -1,5 +1,9 @@
 # KD-YOLOX-ViT
-This repository holds the code for the Python implementation of YOLOX-ViT. Furthermore, it has the implementation of the Knowledge Distillation (KD) method, evaluation metrics of the object detector, and the side-scan sonar image dataset for underwater wall detection.
+This repository holds the implementation of YOLOX-ViT, Knowledge Distillation (KD), evaluation metrics of the object detector, and the side-scan sonar image dataset for underwater wall detection from [our paper](https://arxiv.org/abs/2403.09313):
+
+> Aubard, M., Antal, L.,  Madureira, A., Ábrahám, E. (2024). Knowledge Distillation in YOLOX-ViT for Side-Scan Sonar Object Detection. arXiv preprint arXiv: 2403.09313.
+
+If any of this work has been useful in your research, please consider citing us 😃.
 
 The Sonar Wall Detection Dataset (SWDD) is publicly accessible at https://zenodo.org/records/10528135.
 
