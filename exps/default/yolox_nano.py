@@ -89,7 +89,7 @@ class Exp(MyExp):
             # NANO model use depthwise = True, which is main difference.
             backbone = YOLOPAFPN(
                 self.depth, self.width, in_channels=in_channels,
-                act=self.act, depthwise=True,
+                act=self.act, depthwise=True, vit = self.vit
             )
             head = YOLOXHead(
                 self.num_classes, self.width, in_channels=in_channels,
