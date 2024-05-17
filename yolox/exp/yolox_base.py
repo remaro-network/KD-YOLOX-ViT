@@ -36,6 +36,12 @@ class Exp(BaseExp):
         # ---------------- Knowledge Distillation config ---------------- #
         #Knowledge Distillation
         self.KD = False
+        
+        #Teacher is name parameter of the teacher model for the knowledge distillation
+        self.teacher = None
+        #Teacher_weights is the path of the teacher weights
+        self.teacher_weights = None
+        
         #online distillation meaning online teacher inference while student training
         #if KD = True and KD_Online = False ---> all parameters for online data augmentation = false
         self.KD_online = False
@@ -143,7 +149,9 @@ class Exp(BaseExp):
         if getattr(self, "model", None) is None:
             in_channels = [256, 512, 1024]
             backbone = YOLOPAFPN(self.depth, self.width, in_channels=in_channels, act=self.act, vit=self.vit)
-            head = YOLOXHead(self.num_classes, self.width, in_channels=in_channels, act=self.act, KD=self.KD, KD_Online=self.KD_online, folder_KD_directory=self.folder_KD_directory, exp_name=self.exp_name)
+            head = YOLOXHead(self.num_classes, self.width, in_channels=in_channels, act=self.act, KD=self.KD, 
+                             KD_Online=self.KD_online, folder_KD_directory=self.folder_KD_directory, 
+                             exp_name=self.exp_name, teacher=self.teacher, teacher_weights=self.teacher_weights)
             self.model = YOLOX(backbone, head)
 
         self.model.apply(init_yolo)

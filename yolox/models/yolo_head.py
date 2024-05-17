@@ -35,6 +35,8 @@ class YOLOXHead(nn.Module):
         KD_Online=None, 
         folder_KD_directory="",
         exp_name = None,
+        teacher = None,
+        teacher_weights = None
     ):
         """
         Args:
@@ -47,7 +49,8 @@ class YOLOXHead(nn.Module):
         self.KD_Online=KD_Online 
         self.folder_KD_directory=folder_KD_directory
         self.exp_name = exp_name
-
+        self.teacher = teacher
+        self.teacher_weights = teacher_weights
 
         self.num_classes = num_classes
         self.decode_in_inference = True  # for deploy, set to False
@@ -224,7 +227,7 @@ class YOLOXHead(nn.Module):
                     teacher_output = torch.cat([reg_output, obj_output, cls_output], 1)
                     batch_info = {'outputs': teacher_output}
                     if(name_image != None):
-                        file_path = f'{self.folder_KD_directory}{name_image}-{fpn_logit}.npy'
+                        file_path = f'{self.folder_KD_directory}teacher_distillation_{name_image}-{fpn_logit}.npy'
                         np.save(file_path, batch_info)
                 ######################KD WITH LOGIT FOR INFERENCE - END#######################
                 output = torch.cat(
@@ -309,7 +312,7 @@ class YOLOXHead(nn.Module):
         # the trained weights can be modified, by default it takes the last 300 epoch of the corresponding YOLOX architecture use for the inference 
         
         
-        yolox_command = f"python3 tools/demo.py image -n {self.exp_name} --path '{self.folder_KD_directory}/teacher_distillation_{filename}' --conf 0.5 --nms 0.45 --tsize {tsize} --ckpt YOLOX_outputs/{self.exp_name}/SSS_wholeImage_noAug/epoch_400_ckpt.pth --save_result"
+        yolox_command = f"python3 tools/demo.py image -n {self.teacher} --path '{self.folder_KD_directory}teacher_distillation_{filename}' --conf 0.5 --nms 0.45 --tsize {tsize} --ckpt {self.teacher_weights} --save_result"
         os.system(yolox_command)
 
     def get_losses(
@@ -400,6 +403,7 @@ class YOLOXHead(nn.Module):
                 file_name1 = f"teacher_distillation_{i}-1.npy"
                 file_name2 = f"teacher_distillation_{i}-2.npy"
 
+                
                 teacher_file0 = os.path.join(self.folder_KD_directory, file_name0)
                 teacher_file1 = os.path.join(self.folder_KD_directory, file_name1)
                 teacher_file2 = os.path.join(self.folder_KD_directory, file_name2)

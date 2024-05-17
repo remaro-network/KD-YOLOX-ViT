@@ -30,6 +30,12 @@ class Exp(MyExp):
         #KD set to True activate add the KD loss to the ground truth loss
         self.KD = False
         
+        #Teacher model for the Knowledge Distillation
+        self.teacher = "yolox_l"
+        
+        #Path of the weights of the teacher for the Knowledge Distillation
+        self.teacher_weights = "weights/"
+        
         #KD_Online set to False recquires the teacher FPN logits saved to the "folder_KD_directory" folder
         #Then the student training will use the teacher FPN logits
         #Otherwise, if KD_Online set to True the student use the online data augmentation and does not recquire saved teacher FPN logits
@@ -86,7 +92,8 @@ class Exp(MyExp):
             in_channels = [256, 512, 1024]
             # NANO model use depthwise = True, which is main difference.
             backbone = YOLOPAFPN(self.depth, self.width, in_channels=in_channels, depthwise=True, vit=self.vit)
-            head = YOLOXHead(self.num_classes, self.width, in_channels=in_channels, depthwise=True)
+            head = YOLOXHead(self.num_classes, self.width, in_channels=in_channels, act=self.act, depthwise=True, KD=self.KD, KD_Online=self.KD_online, 
+                             folder_KD_directory=self.folder_KD_directory, exp_name=self.exp_name, teacher=self.teacher, teacher_weights=self.teacher_weights)
             self.model = YOLOX(backbone, head)
 
         self.model.apply(init_yolo)

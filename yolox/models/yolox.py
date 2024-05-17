@@ -38,7 +38,7 @@ class YOLOX(nn.Module):
         if self.training:
             assert targets is not None
             loss, iou_loss, conf_loss, cls_loss, l1_loss, num_fg = self.head(
-                fpn_outs, targets, x, name_image, size_image
+                fpn_outs, targets, x, name_image, size_image,
             )
             outputs = {
                 "total_loss": loss,
