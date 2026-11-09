@@ -30,7 +30,7 @@ def get_install_requirements():
 
 
 def get_yolox_version():
-    with open("yolox/__init__.py", "r") as f:
+    with open("yolox/__init__.py", "r", encoding="utf-8") as f:
         version = re.search(
             r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
             f.read(), re.MULTILINE
